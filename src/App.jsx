@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   signInAnonymously,
-  signInWithCustomToken, 
+  signInWithCustomToken, // <--- ESTA FALTABA, AHORA ESTÁ AQUÍ
   signOut, 
 } from "firebase/auth";
 import { 
@@ -20,97 +20,11 @@ import {
 } from "firebase/firestore";
 import { 
   ShieldCheck, LogOut, Package, Users, Eye, 
-  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2, CheckSquare, Square 
+  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2 
 } from 'lucide-react';
 
-// --- ESTILOS CSS INTEGRADOS (Para asegurar la interfaz visual) ---
-const adminStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
-  
-  :root { --bg-dark: #0a0a12; --card-bg: #111827; --primary: #4f46e5; --text-main: #f3f4f6; --text-muted: #9ca3af; }
-  body { margin: 0; font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-main); }
-  .font-orbitron { font-family: 'Orbitron', sans-serif; }
-  
-  /* Utilidades estilo Tailwind */
-  .min-h-screen { min-height: 100vh; }
-  .flex { display: flex; }
-  .flex-col { flex-direction: column; }
-  .items-center { align-items: center; }
-  .justify-center { justify-content: center; }
-  .justify-between { justify-content: space-between; }
-  .p-4 { padding: 1rem; }
-  .p-6 { padding: 1.5rem; }
-  .p-8 { padding: 2rem; }
-  .px-4 { padding-left: 1rem; padding-right: 1rem; }
-  .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-  .mb-4 { margin-bottom: 1rem; }
-  .mb-6 { margin-bottom: 1.5rem; }
-  .mb-8 { margin-bottom: 2rem; }
-  .gap-2 { gap: 0.5rem; }
-  .gap-4 { gap: 1rem; }
-  .gap-8 { gap: 2rem; }
-  .w-full { width: 100%; }
-  .max-w-7xl { max-width: 80rem; }
-  .max-w-md { max-width: 28rem; }
-  .max-w-2xl { max-width: 42rem; }
-  .mx-auto { margin-left: auto; margin-right: auto; }
-  .rounded-2xl { border-radius: 1rem; }
-  .rounded-lg { border-radius: 0.5rem; }
-  .rounded-full { border-radius: 9999px; }
-  .border { border-width: 1px; }
-  .border-b { border-bottom-width: 1px; }
-  .border-indigo-500-30 { border-color: rgba(79, 70, 229, 0.3); }
-  .border-gray-700 { border-color: #374151; }
-  .bg-gray-900 { background-color: var(--bg-dark); }
-  .bg-gray-900-80 { background-color: rgba(17, 24, 39, 0.8); }
-  .bg-gray-800 { background-color: #1f2937; }
-  .bg-indigo-600 { background-color: var(--primary); }
-  .text-white { color: white; }
-  .text-gray-400 { color: var(--text-muted); }
-  .text-indigo-400 { color: #818cf8; }
-  .text-green-400 { color: #4ade80; }
-  .text-red-400 { color: #f87171; }
-  .font-bold { font-weight: 700; }
-  .text-xl { font-size: 1.25rem; }
-  .text-2xl { font-size: 1.5rem; }
-  .text-3xl { font-size: 1.875rem; }
-  .text-sm { font-size: 0.875rem; }
-  .text-xs { font-size: 0.75rem; }
-  .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-  .backdrop-blur { backdrop-filter: blur(8px); }
-  .cursor-pointer { cursor: pointer; }
-  .hover-bg-indigo-700:hover { background-color: #4338ca; }
-  .grid { display: grid; }
-  .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-  
-  @media (min-width: 768px) {
-    .md-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .md-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  }
-
-  /* Tabla */
-  table { width: 100%; border-collapse: collapse; }
-  th { text-align: left; padding: 1rem; color: #9ca3af; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #374151; }
-  td { padding: 1rem; border-bottom: 1px solid #374151; color: #e5e7eb; }
-  tr:hover { background-color: rgba(55, 65, 81, 0.5); }
-  
-  /* Inputs y Selects */
-  input, select { background-color: #111827; border: 1px solid #374151; color: white; padding: 0.75rem; border-radius: 0.5rem; width: 100%; box-sizing: border-box; outline: none; }
-  input:focus, select:focus { border-color: var(--primary); }
-
-  /* Modal */
-  .fixed { position: fixed; }
-  .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
-  .z-50 { z-index: 50; }
-  .z-60 { z-index: 60; }
-  .bg-black-80 { background-color: rgba(0, 0, 0, 0.8); }
-  .overflow-y-auto { overflow-y: auto; }
-  .max-h-90vh { max-height: 90vh; }
-  .sticky { position: sticky; }
-  .top-0 { top: 0; }
-`;
-
 // --- CONFIGURACIÓN FIREBASE ---
+// Esta configuración conecta a la misma base de datos que tu tienda pública.
 const firebaseConfig = {
     apiKey: "AIzaSyDYYKRuG39vi35a5CTxwoCQ7iPvvppakjU",
     authDomain: "tecnobyte-59f74.firebaseapp.com",
@@ -124,7 +38,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ID COMPARTIDO
+// ID COMPARTIDO CON LA TIENDA
 const appId = 'tecnobyte_store_v2'; 
 
 const ORDER_STATUSES = [
@@ -149,14 +63,21 @@ const Login = ({ onLoginSuccess }) => {
     setError('');
 
     let isValid = false;
-    let permissions = { manage_admins: true, manage_orders: true, manage_web: true }; 
+    let permissions = { manage_admins: true, manage_orders: true, manage_web: true }; // Master permissions
 
+    // 1. Master Check
     if (username === MASTER_USER && password === MASTER_PASS) {
         isValid = true;
     } else {
+        // 2. DB Check
         try {
-            // Login anónimo para leer DB de admins
-            if (!auth.currentUser) await signInAnonymously(auth);
+            // Intenta usar token custom si existe (en entorno local), sino anónimo
+            // Para Vercel puro, el anónimo es lo más seguro sin backend
+            if (typeof window !== 'undefined' && window.__initial_auth_token) {
+                 await signInWithCustomToken(auth, window.__initial_auth_token);
+            } else {
+                 await signInAnonymously(auth);
+            }
             
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'secure_admins'), where("username", "==", username));
             const querySnapshot = await getDocs(q);
@@ -170,44 +91,70 @@ const Login = ({ onLoginSuccess }) => {
             }
         } catch (err) {
             console.error(err);
-            setError("Error de conexión.");
+            setError("Error de conexión. Intenta de nuevo.");
             setIsLoading(false);
             return;
         }
     }
 
     if (isValid) {
-        if (!auth.currentUser) { try { await signInAnonymously(auth); } catch(e) {} }
+        if (!auth.currentUser) {
+             try { 
+                if (typeof window !== 'undefined' && window.__initial_auth_token) {
+                    await signInWithCustomToken(auth, window.__initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+             } catch(e) {}
+        }
         onLoginSuccess({ username, permissions });
     } else {
-        setError("Credenciales incorrectas.");
+        setError("Usuario o contraseña incorrectos.");
         setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0a0a12] flex items-center justify-center p-4 font-sans text-gray-100">
-      <style>{adminStyles}</style>
-      <div className="w-full max-w-md bg-gray-900-80 p-8 rounded-2xl border border-indigo-500-30 shadow-2xl backdrop-blur">
+      <div className="w-full max-w-md bg-gray-900/80 p-8 rounded-2xl border border-indigo-500/30 shadow-2xl backdrop-blur">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center">
+          <div className="w-16 h-16 bg-indigo-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(79,70,229,0.5)]">
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
         </div>
         <h2 className="text-2xl font-bold text-center text-white mb-2 font-orbitron">Panel Administrativo</h2>
         <p className="text-gray-400 text-center text-sm mb-6">Acceso Restringido</p>
         
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-gray-400 text-xs mb-1 uppercase">Usuario</label>
-            <input type="text" required value={username} onChange={e => setUsername(e.target.value)} placeholder="Usuario" />
+            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Usuario</label>
+            <input 
+                type="text" 
+                required 
+                value={username} 
+                onChange={e => setUsername(e.target.value)} 
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                placeholder="Ingresa tu usuario"
+            />
           </div>
           <div>
-            <label className="block text-gray-400 text-xs mb-1 uppercase">Contraseña</label>
-            <input type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" />
+            <label className="block text-gray-400 text-xs mb-1 uppercase tracking-wider">Contraseña</label>
+            <input 
+                type="password" 
+                required 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 text-white focus:border-indigo-500 focus:outline-none transition-colors"
+                placeholder="••••••••"
+            />
           </div>
-          {error && <p className="text-red-400 text-xs text-center p-2 border border-red-400 rounded">{error}</p>}
-          <button type="submit" disabled={isLoading} className="w-full bg-indigo-600 hover-bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg flex justify-center items-center cursor-pointer">
+          {error && <p className="text-red-400 text-xs text-center bg-red-900/20 p-2 rounded border border-red-900">{error}</p>}
+          
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg transition-colors flex justify-center items-center"
+          >
             {isLoading ? <Loader className="animate-spin w-5 h-5" /> : "Iniciar Sesión"}
           </button>
         </form>
@@ -223,16 +170,18 @@ const Dashboard = ({ user, onLogout }) => {
   const [view, setView] = useState('orders'); 
   const [loading, setLoading] = useState(true);
   
+  // Admin Management State
   const [adminsList, setAdminsList] = useState([]);
   const [newAdminUser, setNewAdminUser] = useState('');
   const [newAdminPass, setNewAdminPass] = useState('');
   const [newPermissions, setNewPermissions] = useState({ manage_orders: true, manage_web: false, manage_admins: false });
 
-  // Cargar Pedidos
+  // Load Orders
   useEffect(() => {
     const q = collection(db, 'artifacts', appId, 'public', 'data', 'secure_orders_v2');
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Ordenar por fecha descendente en memoria
       ordersData.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
       setOrders(ordersData);
       setLoading(false);
@@ -240,9 +189,10 @@ const Dashboard = ({ user, onLogout }) => {
     return () => unsubscribe();
   }, []);
 
-  // Cargar Admins
+  // Load Admins (Only if Master or has permission)
   useEffect(() => {
     if (!user.permissions?.manage_admins && user.username !== MASTER_USER) return;
+    
     const q = collection(db, 'artifacts', appId, 'public', 'data', 'secure_admins');
     const unsubscribe = onSnapshot(q, (snapshot) => {
         setAdminsList(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -250,7 +200,7 @@ const Dashboard = ({ user, onLogout }) => {
     return () => unsubscribe();
   }, [user]);
 
-  const handleStatusChange = async (orderId, status) => {
+  const updateStatus = async (orderId, status) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'secure_orders_v2', orderId), { status });
     } catch (e) {
@@ -260,9 +210,12 @@ const Dashboard = ({ user, onLogout }) => {
 
   const handleCreateAdmin = async (e) => {
       e.preventDefault();
+      // SECURITY: Double check on submit
       if (user.username !== MASTER_USER && !user.permissions?.manage_admins) {
-          alert("Acceso denegado."); return;
+          alert("Acceso denegado.");
+          return;
       }
+      
       try {
           await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'secure_admins'), {
               username: newAdminUser,
@@ -271,35 +224,52 @@ const Dashboard = ({ user, onLogout }) => {
               createdBy: user.username,
               createdAt: new Date().toISOString()
           });
-          setNewAdminUser(''); setNewAdminPass('');
-          alert("Admin registrado.");
-      } catch (e) { alert("Error: " + e.message); }
+          setNewAdminUser('');
+          setNewAdminPass('');
+          alert("Admin registrado exitosamente.");
+      } catch (e) {
+          alert("Error: " + e.message);
+      }
   };
 
   const handleDeleteAdmin = async (id) => {
       if (user.username !== MASTER_USER && !user.permissions?.manage_admins) return;
-      if(window.confirm("¿Eliminar administrador?")) {
+      if(window.confirm("¿Eliminar administrador permanentemente?")) {
           await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'secure_admins', id));
       }
   };
 
   const totalSales = orders.reduce((acc, order) => acc + parseFloat(order.total || 0), 0).toFixed(2);
-  const canManageAdmins = user.username === MASTER_USER || user.permissions?.manage_admins;
+  const isMaster = user.username === MASTER_USER;
+  const canManageAdmins = isMaster || user.permissions?.manage_admins;
+
+  // Render Helpers
+  const renderUser = (u) => {
+      if (typeof u === 'string') return u;
+      if (typeof u === 'object' && u !== null) return u.name || 'Unknown';
+      return 'Guest';
+  };
+  const renderItems = (items) => {
+      if (typeof items === 'string') return items;
+      if (Array.isArray(items)) return items.map(i => i.title || i).join(', ');
+      return '';
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a12] text-gray-100 font-sans">
-      <style>{adminStyles}</style>
       
       {/* Header */}
-      <header className="bg-gray-900-80 border-b border-gray-700 sticky top-0 z-50 backdrop-blur">
+      <header className="bg-gray-900/80 border-b border-gray-800 sticky top-0 z-50 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="text-indigo-400 w-6 h-6" />
-            <h1 className="font-bold text-xl font-orbitron">TecnoByte <span className="text-gray-400 text-sm font-sans">| Admin</span></h1>
+            <ShieldCheck className="text-indigo-500 w-6 h-6" />
+            <h1 className="font-bold text-xl tracking-tight font-orbitron">TecnoByte <span className="text-gray-500 text-sm font-normal font-sans">| Admin</span></h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs bg-gray-800 text-indigo-400 px-3 py-1 rounded border border-gray-700 font-mono">{user.username}</span>
-            <button onClick={onLogout} className="text-red-400 hover:text-white flex items-center gap-2 text-xs font-bold px-3 py-1 rounded border border-gray-700 cursor-pointer">
+            <span className="text-xs bg-indigo-900/30 text-indigo-400 px-3 py-1 rounded border border-indigo-500/20 font-mono">
+                {user.username}
+            </span>
+            <button onClick={onLogout} className="text-red-400 hover:text-white transition-colors flex items-center gap-2 text-xs font-bold hover:bg-red-900/20 px-3 py-1 rounded">
                 <LogOut size={14} /> Salir
             </button>
           </div>
@@ -307,130 +277,202 @@ const Dashboard = ({ user, onLogout }) => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in-up">
-        {/* Tabs */}
+        {/* Navigation Tabs */}
         <div className="flex gap-4 mb-8">
-          <button onClick={() => setView('orders')} className={`px-6 py-3 rounded-lg font-bold flex items-center gap-2 cursor-pointer ${view === 'orders' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
+          <button 
+            onClick={() => setView('orders')} 
+            className={`px-6 py-2.5 rounded-lg font-bold transition-all flex items-center gap-2 ${view === 'orders' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+          >
             <Package size={18} /> Pedidos
           </button>
+          
+          {/* SECURED TAB: Only visible to Master or Permitted Admins */}
           {canManageAdmins && (
-            <button onClick={() => setView('admins')} className={`px-6 py-3 rounded-lg font-bold flex items-center gap-2 cursor-pointer ${view === 'admins' ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
-                <Users size={18} /> Gestión Admins
+            <button 
+                onClick={() => setView('admins')} 
+                className={`px-6 py-2.5 rounded-lg font-bold transition-all flex items-center gap-2 ${view === 'admins' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+            >
+                <Users size={18} /> Gestión de Admins
             </button>
           )}
         </div>
 
-        {/* Orders View */}
+        {/* --- ORDERS VIEW --- */}
         {view === 'orders' && (
           <>
-            <div className="grid grid-cols-1 md-grid-cols-3 gap-6 mb-8">
-                <div className="bg-gray-900-80 p-6 rounded-xl border border-gray-700"><h3 className="text-gray-400 text-xs uppercase mb-1">Ventas</h3><p className="text-3xl font-bold text-white">${totalSales}</p></div>
-                <div className="bg-gray-900-80 p-6 rounded-xl border border-gray-700"><h3 className="text-gray-400 text-xs uppercase mb-1">Órdenes</h3><p className="text-3xl font-bold text-yellow-400">{orders.length}</p></div>
-                <div className="bg-gray-900-80 p-6 rounded-xl border border-gray-700"><h3 className="text-gray-400 text-xs uppercase mb-1">Clientes</h3><p className="text-3xl font-bold text-green-400">{new Set(orders.map(o => o.user)).size}</p></div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-gray-900/60 p-6 rounded-xl border border-gray-800 backdrop-blur"><h3 className="text-gray-400 text-xs uppercase tracking-wider mb-1">Ventas Totales</h3><p className="text-3xl font-bold text-white font-orbitron">${totalSales}</p></div>
+                <div className="bg-gray-900/60 p-6 rounded-xl border border-gray-800 backdrop-blur"><h3 className="text-gray-400 text-xs uppercase tracking-wider mb-1">Órdenes</h3><p className="text-3xl font-bold text-yellow-500 font-orbitron">{orders.length}</p></div>
+                <div className="bg-gray-900/60 p-6 rounded-xl border border-gray-800 backdrop-blur"><h3 className="text-gray-400 text-xs uppercase tracking-wider mb-1">Clientes</h3><p className="text-3xl font-bold text-green-500 font-orbitron">{new Set(orders.map(o => o.user)).size}</p></div>
             </div>
 
-            <div className="bg-gray-900-80 rounded-xl overflow-hidden border border-gray-700">
-                <table>
-                    <thead className="bg-gray-800">
+            <div className="bg-gray-900/80 rounded-xl overflow-hidden border border-gray-800 overflow-x-auto shadow-2xl">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-800/50 text-gray-400 text-xs uppercase tracking-wider">
                     <tr>
-                        <th>ID</th><th>Cliente</th><th>Items</th><th>Total</th><th>Estatus</th><th>Acción</th>
+                        <th className="p-4 border-b border-gray-700">ID</th>
+                        <th className="p-4 border-b border-gray-700">Cliente</th>
+                        <th className="p-4 border-b border-gray-700">Items</th>
+                        <th className="p-4 border-b border-gray-700">Total</th>
+                        <th className="p-4 border-b border-gray-700">Estatus</th>
+                        <th className="p-4 border-b border-gray-700">Detalles</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    {loading ? <tr><td colSpan="6" className="p-8 text-center"><Loader className="animate-spin mx-auto text-indigo-400"/></td></tr> : orders.map(order => (
-                        <tr key={order.id}>
-                        <td className="font-mono text-xs text-gray-500">{order.id}</td>
-                        <td>{typeof order.user === 'string' ? order.user : 'Guest'}</td>
-                        <td className="text-sm text-gray-400 truncate max-w-xs">{Array.isArray(order.items) ? order.items.join(', ') : ''}</td>
-                        <td className="font-bold text-green-400">${order.total}</td>
-                        <td>
-                            <select value={order.status} onChange={(e) => handleStatusChange(order.id, e.target.value)} className="cursor-pointer">
+                    <tbody className="divide-y divide-gray-800">
+                    {loading ? <tr><td colSpan="6" className="p-8 text-center"><Loader className="animate-spin mx-auto text-indigo-500"/></td></tr> : orders.map(order => (
+                        <tr key={order.id} className="hover:bg-gray-800/50 transition-colors">
+                        <td className="p-4 font-mono text-xs text-gray-500">{order.id}</td>
+                        <td className="p-4 font-medium text-white">{renderUser(order.user)}</td>
+                        <td className="p-4 text-sm text-gray-300 max-w-xs truncate">{renderItems(order.items)}</td>
+                        <td className="p-4 text-green-400 font-bold">${order.total}</td>
+                        <td className="p-4">
+                            <select value={order.status} onChange={(e) => updateStatus(order.id, e.target.value)} className="bg-gray-800 border border-gray-700 text-xs rounded px-2 py-1 text-gray-300 focus:border-indigo-500 outline-none">
                             {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </td>
-                        <td><button onClick={() => setSelectedOrder(order)} className="text-indigo-400 bg-gray-800 p-2 rounded cursor-pointer"><Eye size={18} /></button></td>
+                        <td className="p-4"><button onClick={() => setSelectedOrder(order)} className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-900/20 p-2 rounded"><Eye size={18} /></button></td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
+                {orders.length === 0 && !loading && <div className="p-12 text-center text-gray-500"><Package className="w-12 h-12 mx-auto mb-4 opacity-20" /><p>No hay pedidos recientes.</p></div>}
             </div>
           </>
         )}
 
-        {/* Admin Management View */}
-        {view === 'admins' && canManageAdmins && (
-          <div className="grid grid-cols-1 md-grid-cols-2 gap-8">
-              <div className="bg-gray-900-80 p-8 rounded-xl border border-gray-700 h-fit">
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><Plus className="text-green-400" /> Nuevo Admin</h3>
-                  <form onSubmit={handleCreateAdmin} className="flex flex-col gap-4">
-                      <input type="text" required value={newAdminUser} onChange={e=>setNewAdminUser(e.target.value)} placeholder="Usuario"/>
-                      <input type="password" required value={newAdminPass} onChange={e=>setNewAdminPass(e.target.value)} placeholder="Contraseña"/>
+        {/* --- ADMIN MANAGEMENT VIEW (SECURED) --- */}
+        {view === 'admins' && isMaster && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Formulario */}
+              <div className="bg-gray-900/60 p-8 rounded-xl border border-gray-800 backdrop-blur h-fit">
+                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 pb-4 border-b border-gray-800">
+                      <Plus className="text-green-500" /> Registrar Nuevo Admin
+                  </h3>
+                  <form onSubmit={handleCreateAdmin} className="space-y-4">
+                      <div>
+                          <label className="block text-gray-400 text-xs mb-1 uppercase">Usuario</label>
+                          <input type="text" required value={newAdminUser} onChange={e=>setNewAdminUser(e.target.value)} className="w-full bg-black/40 border border-gray-700 rounded p-3 text-white focus:border-indigo-500 outline-none" placeholder="Ej: AdminSoporte"/>
+                      </div>
+                      <div>
+                          <label className="block text-gray-400 text-xs mb-1 uppercase">Contraseña</label>
+                          <input type="password" required value={newAdminPass} onChange={e=>setNewAdminPass(e.target.value)} className="w-full bg-black/40 border border-gray-700 rounded p-3 text-white focus:border-indigo-500 outline-none" placeholder="********"/>
+                      </div>
                       
-                      <div className="bg-gray-800 p-4 rounded border border-gray-700 flex flex-col gap-2">
-                          <p className="text-xs text-indigo-400 font-bold uppercase">Permisos</p>
+                      <div className="bg-gray-800/50 p-4 rounded border border-gray-700 space-y-3">
+                          <p className="text-xs text-indigo-400 font-bold uppercase mb-2">Permisos de Acceso</p>
                           <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                              <input type="checkbox" checked={newPermissions.manage_orders} onChange={e => setNewPermissions({...newPermissions, manage_orders: e.target.checked})}/> Gestionar Pedidos
+                              <input type="checkbox" checked={newPermissions.manage_orders} onChange={e => setNewPermissions({...newPermissions, manage_orders: e.target.checked})} className="accent-indigo-500 h-4 w-4"/>
+                              Gestionar Pedidos (Ver y cambiar estado)
                           </label>
                           <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-                              <input type="checkbox" checked={newPermissions.manage_admins} onChange={e => setNewPermissions({...newPermissions, manage_admins: e.target.checked})}/> Gestionar Admins
+                              <input type="checkbox" checked={newPermissions.manage_admins} onChange={e => setNewPermissions({...newPermissions, manage_admins: e.target.checked})} className="accent-indigo-500 h-4 w-4"/>
+                              Gestionar Administradores (Crear/Eliminar)
+                          </label>
+                          <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+                              <input type="checkbox" checked={newPermissions.manage_web} onChange={e => setNewPermissions({...newPermissions, manage_web: e.target.checked})} className="accent-indigo-500 h-4 w-4"/>
+                              Gestionar Configuración Web
                           </label>
                       </div>
-                      <button type="submit" className="bg-green-600 hover-bg-green-700 text-white font-bold py-3 rounded-lg cursor-pointer">Registrar</button>
+
+                      <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg">
+                          Registrar Administrador
+                      </button>
                   </form>
               </div>
 
-              <div className="bg-gray-900-80 p-8 rounded-xl border border-gray-700">
-                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2"><Users className="text-indigo-400" /> Admins Activos</h3>
-                  <div className="flex flex-col gap-3">
-                      <div className="flex justify-between items-center bg-gray-800 border border-gray-700 p-4 rounded-lg">
+              {/* Lista */}
+              <div className="bg-gray-900/60 p-8 rounded-xl border border-gray-800 backdrop-blur">
+                  <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 pb-4 border-b border-gray-800">
+                      <Users className="text-indigo-500" /> Administradores Activos
+                  </h3>
+                  <div className="space-y-3">
+                      {/* Master Admin (Protected) */}
+                      <div className="flex justify-between items-center bg-indigo-900/20 border border-indigo-500/30 p-4 rounded-lg">
                           <div className="flex items-center gap-3">
-                              <ShieldCheck className="text-indigo-400" size={20}/>
-                              <div><p className="text-white font-mono font-bold">{MASTER_USER}</p><p className="text-xs text-indigo-300 uppercase">Super Admin</p></div>
+                              <div className="bg-indigo-500/20 p-2 rounded-full"><ShieldCheck className="text-indigo-400" size={20}/></div>
+                              <div>
+                                  <p className="text-white font-mono font-bold">{MASTER_USER}</p>
+                                  <p className="text-[10px] text-indigo-300 uppercase tracking-wider">Super Admin (Protegido)</p>
+                              </div>
                           </div>
                       </div>
+
+                      {/* Dynamic List */}
                       {adminsList.map(admin => (
-                          <div key={admin.id} className="flex justify-between items-center bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                          <div key={admin.id} className="flex justify-between items-center bg-black/40 border border-gray-700 p-4 rounded-lg hover:border-gray-600 transition-colors">
                               <div className="flex items-center gap-3">
-                                  <Users className="text-gray-400" size={20}/>
-                                  <div><p className="text-white font-mono">{admin.username}</p><p className="text-xs text-gray-500 uppercase">Secundario</p></div>
+                                  <div className="bg-gray-700/50 p-2 rounded-full"><Users className="text-gray-400" size={20}/></div>
+                                  <div>
+                                      <p className="text-white font-mono">{admin.username}</p>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                          {admin.permissions?.manage_orders && <span className="text-[9px] bg-green-900/30 text-green-400 px-1.5 py-0.5 rounded border border-green-900">PEDIDOS</span>}
+                                          {admin.permissions?.manage_admins && <span className="text-[9px] bg-red-900/30 text-red-400 px-1.5 py-0.5 rounded border border-red-900">ADMINS</span>}
+                                          {admin.permissions?.manage_web && <span className="text-[9px] bg-blue-900/30 text-blue-400 px-1.5 py-0.5 rounded border border-blue-900">WEB</span>}
+                                      </div>
+                                  </div>
                               </div>
+                              
+                              {/* SECURITY CHECK: Cannot delete Master User */}
                               {admin.username !== MASTER_USER && (
-                                  <button onClick={() => handleDeleteAdmin(admin.id)} className="text-red-400 hover-text-white p-2 rounded cursor-pointer"><Trash2 size={18}/></button>
+                                  <button onClick={() => handleDeleteAdmin(admin.id)} className="text-gray-500 hover:text-red-400 hover:bg-red-900/10 p-2 rounded transition-colors" title="Eliminar Acceso">
+                                      <Trash2 size={18}/>
+                                  </button>
                               )}
                           </div>
                       ))}
+                      
+                      {adminsList.length === 0 && <p className="text-gray-500 text-center py-4 text-sm">No hay admins secundarios.</p>}
                   </div>
               </div>
           </div>
         )}
       </div>
 
+      {/* MODAL DETALLES */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black-80 backdrop-blur">
-            <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-2xl max-h-90vh overflow-y-auto shadow-2xl relative">
-                <div className="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-900 sticky top-0">
-                    <h3 className="text-xl font-bold text-white">Detalles: {selectedOrder.id}</h3>
-                    <button onClick={() => setSelectedOrder(null)} className="p-2 rounded-full text-gray-400 hover:text-white cursor-pointer"><X size={20} /></button>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-gray-800 border border-gray-600 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-scale-in relative">
+                <div className="p-6 border-b border-gray-700 flex justify-between items-center bg-gray-900/50 sticky top-0 z-10 backdrop-blur-md">
+                    <div>
+                        <h3 className="text-xl font-bold text-white">Detalles de Orden</h3>
+                        <p className="text-xs text-gray-400 font-mono mt-1">ID: {selectedOrder.id}</p>
+                    </div>
+                    <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white"><X size={20} /></button>
                 </div>
-                <div className="p-6 flex flex-col gap-6">
-                    <div className="grid grid-cols-1 md-grid-cols-2 gap-4">
-                        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                
+                <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
                             <h4 className="text-indigo-400 font-bold text-xs uppercase mb-2">Cliente</h4>
-                            <p className="text-white">{typeof selectedOrder.user === 'string' ? selectedOrder.user : 'N/A'}</p>
-                            <p className="text-gray-400 text-sm">{selectedOrder.fullData?.email}</p>
+                            <p className="text-white font-medium">{renderUser(selectedOrder.user)}</p>
+                            <p className="text-gray-400 text-sm mt-1">{selectedOrder.fullData?.email}</p>
                             <p className="text-gray-400 text-sm">{selectedOrder.fullData?.contactPhone}</p>
                         </div>
-                        <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                        <div className="bg-gray-900 p-4 rounded-lg border border-gray-700">
                             <h4 className="text-green-400 font-bold text-xs uppercase mb-2">Pago</h4>
-                            <p className="text-white uppercase">{String(selectedOrder.paymentMethod)}</p>
-                            <p className="text-white font-mono bg-black p-1 rounded text-sm mt-1">{selectedOrder.fullData?.refNumber || 'N/A'}</p>
+                            <p className="text-white font-medium uppercase">{selectedOrder.paymentMethod}</p>
+                            <p className="text-gray-400 text-xs mt-1 uppercase">Ref:</p>
+                            <p className="text-white font-mono bg-black/30 p-1 rounded text-sm">{selectedOrder.fullData?.refNumber || 'N/A'}</p>
                         </div>
                     </div>
-                    {selectedOrder.fullData?.screenshot && (
-                        <div>
-                            <h4 className="text-gray-400 text-xs uppercase mb-2 font-bold">Comprobante</h4>
-                            <img src={selectedOrder.fullData.screenshot.data} className="w-full rounded border border-gray-700 bg-black" alt="Pago"/>
-                        </div>
-                    )}
+                    
+                    {/* Capturas */}
+                    <div className="space-y-4 pt-4 border-t border-gray-700">
+                        {selectedOrder.fullData?.screenshot && (
+                            <div>
+                                <h4 className="text-gray-400 text-xs uppercase mb-2 font-bold">Comprobante</h4>
+                                <img src={selectedOrder.fullData.screenshot.data} className="w-full rounded border border-gray-700 bg-black" alt="Pago"/>
+                            </div>
+                        )}
+                        {selectedOrder.fullData?.exchangeData && (
+                            <div className="bg-yellow-900/10 border border-yellow-600/30 p-4 rounded-lg mt-4">
+                              <h4 className="text-yellow-500 font-bold text-xs uppercase mb-2 flex items-center gap-2"><RefreshCw size={14}/> Datos Exchange</h4>
+                              <p className="text-gray-400 text-sm">Tipo: {selectedOrder.fullData.exchangeData.receiveType}</p>
+                              <p className="text-gray-400 text-sm">Monto: {selectedOrder.fullData.exchangeData.receiveAmount}</p>
+                              <p className="text-gray-400 text-sm mt-1 break-all bg-black/30 p-2 rounded">{selectedOrder.fullData.exchangeData.receiveAddress}</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
@@ -439,6 +481,7 @@ const Dashboard = ({ user, onLogout }) => {
   );
 };
 
+// --- APP COMPONENT ---
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
