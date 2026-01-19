@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   signInAnonymously,
-  signInWithCustomToken,
   signOut, 
 } from "firebase/auth";
 import { 
@@ -20,7 +19,7 @@ import {
 } from "firebase/firestore";
 import { 
   ShieldCheck, LogOut, Package, Users, Eye, 
-  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2, CheckSquare, Square 
+  Loader, X, RefreshCw, Plus, Trash2 // Eliminadas importaciones no usadas
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN FIREBASE ---
@@ -70,8 +69,6 @@ const Login = ({ onLoginSuccess }) => {
     } else {
         // 2. DB Check
         try {
-            // Intenta usar token custom si existe (en entorno local), sino anónimo
-            // Para Vercel puro, el anónimo es lo más seguro sin backend
             await signInAnonymously(auth);
             
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'secure_admins'), where("username", "==", username));
