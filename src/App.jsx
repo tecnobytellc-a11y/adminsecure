@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   signInAnonymously,
+  signInWithCustomToken,
   signOut, 
 } from "firebase/auth";
 import { 
@@ -19,11 +20,10 @@ import {
 } from "firebase/firestore";
 import { 
   ShieldCheck, LogOut, Package, Users, Eye, 
-  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2 
+  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2, CheckSquare, Square 
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN FIREBASE ---
-// Configuración limpia para evitar errores de variables no definidas
 const firebaseConfig = {
     apiKey: "AIzaSyDYYKRuG39vi35a5CTxwoCQ7iPvvppakjU",
     authDomain: "tecnobyte-59f74.firebaseapp.com",
@@ -62,15 +62,16 @@ const Login = ({ onLoginSuccess }) => {
     setError('');
 
     let isValid = false;
-    let permissions = { manage_admins: true, manage_orders: true, manage_web: true }; // Permisos del Maestro
+    let permissions = { manage_admins: true, manage_orders: true, manage_web: true }; // Master permissions
 
-    // 1. Verificación Maestra
+    // 1. Master Check
     if (username === MASTER_USER && password === MASTER_PASS) {
         isValid = true;
     } else {
-        // 2. Verificación contra Base de Datos
+        // 2. DB Check
         try {
-            // Conexión anónima para leer la DB de admins
+            // Intenta usar token custom si existe (en entorno local), sino anónimo
+            // Para Vercel puro, el anónimo es lo más seguro sin backend
             await signInAnonymously(auth);
             
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'secure_admins'), where("username", "==", username));
@@ -92,7 +93,6 @@ const Login = ({ onLoginSuccess }) => {
     }
 
     if (isValid) {
-        // Asegurar sesión anónima activa para operaciones de Firestore
         if (!auth.currentUser) {
              try { await signInAnonymously(auth); } catch(e) {}
         }
@@ -199,8 +199,7 @@ const Dashboard = ({ user, onLogout }) => {
     return () => unsubscribe();
   }, [user]);
 
-  // FIX: Función renombrada correctamente para coincidir con la llamada en el JSX
-  const handleStatusChange = async (orderId, status) => {
+  const updateStatus = async (orderId, status) => {
     try {
       await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'secure_orders_v2', orderId), { status });
     } catch (e) {
@@ -326,7 +325,7 @@ const Dashboard = ({ user, onLogout }) => {
                         <td className="p-4 text-sm text-gray-300 max-w-xs truncate">{renderItems(order.items)}</td>
                         <td className="p-4 text-green-400 font-bold">${order.total}</td>
                         <td className="p-4">
-                            <select value={order.status} onChange={(e) => handleStatusChange(order.id, e.target.value)} className="bg-gray-800 border border-gray-700 text-xs rounded px-2 py-1 text-gray-300 focus:border-indigo-500 outline-none">
+                            <select value={order.status} onChange={(e) => updateStatus(order.id, e.target.value)} className="bg-gray-800 border border-gray-700 text-xs rounded px-2 py-1 text-gray-300 focus:border-indigo-500 outline-none">
                             {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </td>
@@ -485,14 +484,6 @@ const Dashboard = ({ user, onLogout }) => {
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-
-  // Auto-verificar sesión (opcional para desarrollo)
-  useEffect(() => {
-    const checkSession = async () => {
-       // Aquí podrías implementar persistencia real con localStorage si lo deseas
-    };
-    checkSession();
-  }, []);
 
   const handleLoginSuccess = (user) => {
       setIsAuthenticated(true);
