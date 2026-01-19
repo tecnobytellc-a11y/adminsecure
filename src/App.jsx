@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { 
   getAuth, 
   signInAnonymously,
-  signInWithCustomToken, 
   signOut, 
 } from "firebase/auth";
 import { 
@@ -20,11 +19,10 @@ import {
 } from "firebase/firestore";
 import { 
   ShieldCheck, LogOut, Package, Users, Eye, 
-  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2 
+  Loader, X, RefreshCw, Plus, Trash2 // Eliminadas importaciones no usadas
 } from 'lucide-react';
 
 // --- CONFIGURACIÓN FIREBASE ---
-// Usamos la configuración explícita para evitar errores en Vercel
 const firebaseConfig = {
     apiKey: "AIzaSyDYYKRuG39vi35a5CTxwoCQ7iPvvppakjU",
     authDomain: "tecnobyte-59f74.firebaseapp.com",
@@ -71,7 +69,6 @@ const Login = ({ onLoginSuccess }) => {
     } else {
         // 2. DB Check
         try {
-            // Intenta login anónimo primero para leer la DB
             await signInAnonymously(auth);
             
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'secure_admins'), where("username", "==", username));
