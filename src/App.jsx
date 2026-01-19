@@ -19,10 +19,11 @@ import {
 } from "firebase/firestore";
 import { 
   ShieldCheck, LogOut, Package, Users, Eye, 
-  Loader, X, RefreshCw, Plus, Trash2 // Eliminadas importaciones no usadas
+  Loader, X, RefreshCw, AlertTriangle, Plus, Trash2, CheckSquare, Square 
 } from 'lucide-react';
 
-// --- CONFIGURACIÓN FIREBASE ---
+// --- CONFIGURACIÓN FIREBASE (CORREGIDA) ---
+// Reemplaza esto con tu configuración real de Firebase si es diferente
 const firebaseConfig = {
     apiKey: "AIzaSyDYYKRuG39vi35a5CTxwoCQ7iPvvppakjU",
     authDomain: "tecnobyte-59f74.firebaseapp.com",
